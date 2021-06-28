@@ -13,6 +13,6 @@ import CodeInput1 from './components/CodeInput'
 
 export default defineComponent({
   name: 'App',
-  components: { CodeInput,CodeInput1 }
+  components: { CodeInput, CodeInput1 }
 })
 </script>
