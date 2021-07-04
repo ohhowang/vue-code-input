@@ -1,18 +1,19 @@
 <template>
-  <code-input />
-  <br>
-  <br>
-  <br>
-  <code-input1 />
+  <CodeInput />
+  <br />
+  <CodeInput2 />
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import CodeInput from './components/CodeInput.vue'
-import CodeInput1 from './components/CodeInput'
+import { defineComponent } from "vue";
+import CodeInput2 from "./components/CodeInput";
+import { CodeInput } from "../dist/lib/index";
 
 export default defineComponent({
-  name: 'App',
-  components: { CodeInput,CodeInput1 }
-})
+  name: "App",
+  components: {
+    CodeInput,
+    CodeInput2,
+  },
+});
 </script>
