@@ -1,9 +1,13 @@
 language: node_js
 node_js:
-  - "12"
-  - "14"
-  - "15"
-  - "16"
+  - '12'
+  - '14'
+  - '15'
+  - '16'
 addons:
   chrome: stable
 sudo: required
+install:
+  - yarn
+script:
+  - yarn test
