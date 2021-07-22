@@ -1,140 +1,148 @@
-import {
-  defineComponent,
-  nextTick,
-  onMounted,
-  reactive,
-  ref,
-  toRaw,
-  h,
-} from "vue";
-import "./code-input.scss";
+import { defineComponent, nextTick, onMounted, reactive, ref, toRefs, h, watch } from 'vue'
+import './code-input.scss'
+
+const props = {
+  length: {
+    type: Number,
+    default: 6
+  }
+}
 
 export default defineComponent({
-  name: "CodeInput",
-  setup() {
+  name: 'CodeInput',
+  emits: ['change', 'complete'],
+  props,
+  setup(props, { emit }) {
+    const { length } = props
     // copy code
-    const pasteCode = ref([]);
-    const values = reactive([...Array(6)]);
+    const pasteCode = ref([])
+    const state = reactive({
+      values: []
+    })
+
+    watch(state.values, () => {
+      if (state.values.length === length) {
+        const value = state.values.join().replaceAll(',', '')
+        emit('complete', value)
+      }
+    })
 
     // onInput event
     // @ts-ignore
     const onChange = (event) => {
-      const el = event.target;
+      const el = event.target
+      const index = +el.dataset.index
       if (!!el.value) {
         try {
-          const value = parseInt(el.value);
+          const value = parseInt(el.value)
           if (value >= 0 && value <= 9) {
-            moveCursorToNext(el);
+            state.values[index] = value
+            moveCursorToNext(el)
           } else {
-            throw Error("请输入0-9的数字");
+            throw Error('请输入0-9的数字')
           }
         } catch (error) {
-          el.value = "";
+          el.value = ''
         }
       }
-    };
+    }
 
     // onFocus event
     // @ts-ignore
-    const onFocus = (event) => {
-      const el = event.value;
-    };
+    const onFocus = (event) => {}
 
     // keyboard event
     // @ts-ignore
     const keyDown = (event) => {
-      const index = +event.target.dataset.index;
-      const el = event.target;
-      const keyName = event.key;
+      const index = +event.target.dataset.index
+      const el = event.target
+      const keyName = event.key
 
       switch (keyName) {
-        case "Backspace":
-          const value = el.value;
-          !value && moveCursorToPrevious(el);
-          break;
-        case "Delete":
+        case 'Backspace':
+          // eslint-disable-next-line no-case-declarations
+          const value = el.value
+          !value && moveCursorToPrevious(el)
+          break
+        case 'Delete':
           // console.log(keyName);
-          break;
-        case "Home":
-          el.parentElement.children[0] && el.parentElement.children[0].focus();
-          break;
-        case "End":
-          el.parentElement.children[5] && el.parentElement.children[5].focus();
-          break;
-        case "ArrowLeft":
-          moveCursorToPrevious(el);
-          break;
-        case "ArrowRight":
-          moveCursorToNext(el);
-          break;
-        case "ArrowUp":
+          break
+        case 'Home':
+          el.parentElement.children[0] && el.parentElement.children[0].focus()
+          break
+        case 'End':
+          el.parentElement.children[5] && el.parentElement.children[5].focus()
+          break
+        case 'ArrowLeft':
+          moveCursorToPrevious(el)
+          break
+        case 'ArrowRight':
+          moveCursorToNext(el)
+          break
+        case 'ArrowUp':
           if (!!el.value) {
             if (el.value < 9 && el.value >= 0) {
-              el.value = Number(el.value) + 1;
+              el.value = Number(el.value) + 1
             }
-          } else if (el.value === "") {
-            el.value = 0;
+          } else if (el.value === '') {
+            el.value = 0
           }
-          break;
-        case "ArrowDown":
+          break
+        case 'ArrowDown':
           if (!!el.value) {
             if (el.value <= 9 && el.value > 0) {
-              el.value = Number(el.value) - 1;
+              el.value = Number(el.value) - 1
             }
-          } else if (el.value === "") {
-            el.value = 9;
+          } else if (el.value === '') {
+            el.value = 9
           }
-          break;
+          break
         default:
-          break;
+          break
       }
-    };
+    }
 
     // move to next input
     // @ts-ignore
     const moveCursorToPrevious = (el) => {
       if (!!el.previousElementSibling) {
-        el.previousElementSibling.focus();
-        return true;
+        el.previousElementSibling.focus()
+        return true
       }
-      return false;
-    };
+      return false
+    }
 
     // move to previous input
     // @ts-ignore
     const moveCursorToNext = (el) => {
       if (!!el.nextElementSibling) {
-        el.nextElementSibling.focus();
-        return true;
+        el.nextElementSibling.focus()
+        return true
       }
-      return false;
-    };
+      return false
+    }
 
-    // input ref, auto focus when index equal 0
-    // @ts-ignore
-    const inputRef = (el) => {
-      const index = +el.dataset.index;
-      if (index === 0) {
-        nextTick(() => {
-          el.focus();
-        });
-      }
-    };
+    const inputRef = ref(null)
+    onMounted(() => {
+      // input ref, auto focus when index equal 0
+      const { value } = inputRef
+      value.focus()
+    })
 
-    return { values, onChange, onFocus, keyDown, inputRef };
+    return { ...state, onChange, onFocus, keyDown, inputRef }
   },
   render() {
-    const { values, onChange, onFocus, keyDown, inputRef } = this;
+    const { length, values, onChange, onFocus, keyDown } = this
 
     return (
-      <div class="ink-code-input">
+      <div class="i-code-input">
         <div
-          className="ink-code-input-content"
+          className="i-code-input-content"
           onInput={onChange}
           onFocus={onFocus}
           onKeydown={keyDown}
         >
-          {[...Array(values.length)].map((item, index) => {
+          {[...Array(length)].map((item, index) => {
             return (
               <input
                 max="9"
@@ -144,12 +152,12 @@ export default defineComponent({
                 autocomplete="off"
                 type="tel"
                 value={values[index]}
-                ref={inputRef}
+                ref={index === 0 ? 'inputRef' : ''}
               />
-            );
+            )
           })}
         </div>
       </div>
-    );
-  },
-});
+    )
+  }
+})
